@@ -26,7 +26,7 @@ font = pygame.font.Font('data/roboto.ttf', 25)
 generation = 0
 
 class Dinosaur():
-    def __init__(self, x, y, width, height, img):
+    def __init__(self, x, y, width, height, img): #img must be a pygame surface object
         self.x = x
         self.y = y
         self.width = width
@@ -35,10 +35,10 @@ class Dinosaur():
         self.rect = pygame.Rect(x, y, width, height)
         self.vertical_momentum = 0
         self.onGround = False
-        self.last_closest_pipe = cacti[0]
+        self.last_closest_pipe = cacti[0] # Setting the closest cactus to the leftmost cactus by default
 
     def update(self):
-        self.x, self.y = self.rect.x, self.rect.y
+        self.x, self.y = self.rect.x, self.rect.y # Updating position atributes
         self.movement()
 
     def draw(self):
@@ -57,11 +57,14 @@ class Dinosaur():
             self.onGround = False
 
         if self.onGround:
-            self.rect.bottom = ground_rect.top + 1
+            self.rect.bottom = ground_rect.top + 1 # Adding 1 so that the dinosaur continues to collide with the rect, instead of shaking up and down
+            # Prevent from falling through the ground
             self.vertical_momentum = 0
         else:
+            # Add gravity
             self.vertical_momentum += 0.5
 
+        # Cap gravity
         if self.vertical_momentum >= 40:
             self.vertical_momentum = 40
 
@@ -76,18 +79,20 @@ class Cactus():
         self.rect = pygame.Rect(x, y, width, height)
 
     def update(self):
-        self.x -= self.scroll_speed
-        self.rect.x, self.rect.y = self.x, self.y
+        self.x -= self.scroll_speed # Moves cactus to the left
+        self.rect.x, self.rect.y = self.x, self.y # Update position atributes
 
     def draw(self):
         display.blit(self.img, (self.x, self.y))
 
 def get_distance(first_pos, second_pos):
+    # Distance formula
     dx = first_pos[0] - second_pos[0]
     dy = first_pos[1] - second_pos[1]
     return math.sqrt(dx**2 + dy**2)
 
 def remove_dinosaur(index):
+    # 'Kills' the dinosaur and its corresponding genome and nn
     dinosaurs.pop(index)
     ge.pop(index)
     nets.pop(index)
@@ -173,8 +178,9 @@ def main(genomes, config):
             if dinosaur.closest_pipe != dinosaur.last_closest_pipe:
                 ge[i].fitness += 1
                 for cactus in cacti:
+                    # Increace speed everytime a cactus is passed
                     cactus.scroll_speed += 0.05
-                    scroll_speed += 0.05
+                    scroll_speed += 0.05 
             dinosaur.last_closest_pipe = dinosaur.closest_pipe
 
             # Giving all dinsoaurs a little fitness for staying alive
@@ -192,6 +198,7 @@ def main(genomes, config):
 
         draw()
 
+# Setup the NEAT nn
 def run(config_path):
     config = neat.config.Config(
         neat.DefaultGenome,
